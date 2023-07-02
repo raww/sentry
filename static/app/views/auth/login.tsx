@@ -110,7 +110,7 @@ class Login extends Component<Props, State> {
     return (
       <Fragment>
         <Header>
-          <Heading>{t('Sign in to continue')}</Heading>
+          <Heading>{t('Sign in to continue!!!')}</Heading>
           <AuthNavTabs>{tabs.map(renderTab)}</AuthNavTabs>
         </Header>
         {loading && <LoadingIndicator />}

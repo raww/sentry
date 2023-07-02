@@ -132,7 +132,9 @@ export function getTitle(frame: ReplayFrame): ReactNode {
           ? 'Dead Click'
           : 'Slow Click';
       case 'ui.multiClick':
-        return 'Rage Click';
+        return (frame as MultiClickFrame).data.clickCount > 3
+          ? 'Rage Click'
+          : 'Multi Click';
       case 'replay.mutations':
         return 'Replay';
       case 'ui.click':

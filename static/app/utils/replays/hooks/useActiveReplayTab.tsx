@@ -14,9 +14,21 @@ export enum TabKey {
   MEMORY = 'memory',
   NETWORK = 'network',
   TRACE = 'trace',
+  TRACE_TABLE = 'trace_table',
 }
 
-function isReplayTab(tab: string, _organization: Organization): tab is TabKey {
+function isReplayTab(tab: string, organization: Organization): tab is TabKey {
+  const hasTraceTable =
+    true || organization.features.includes('session-replay-trace-table');
+
+  if (tab === TabKey.TRACE_TABLE) {
+    // If trace-table is enabled, then the TabKey.TRACE_TABLE key is valid
+    return hasTraceTable;
+  }
+  if (tab === TabKey.TRACE) {
+    // if the trace table feature is enabled, then the old TRACE key is invalid
+    return !hasTraceTable;
+  }
   return Object.values<string>(TabKey).includes(tab);
 }
 

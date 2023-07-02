@@ -7,6 +7,7 @@ import ErrorList from 'sentry/views/replays/detail/errorList/index';
 import MemoryChart from 'sentry/views/replays/detail/memoryChart';
 import NetworkList from 'sentry/views/replays/detail/network';
 import Trace from 'sentry/views/replays/detail/trace/index';
+import TraceTable from 'sentry/views/replays/detail/traceTable/index';
 
 type Props = {};
 
@@ -28,6 +29,8 @@ function FocusArea({}: Props) {
       );
     case TabKey.TRACE:
       return <Trace organization={organization} replayRecord={replay?.getReplay()} />;
+    case TabKey.TRACE_TABLE:
+      return <TraceTable />;
     case TabKey.ERRORS:
       return (
         <ErrorList

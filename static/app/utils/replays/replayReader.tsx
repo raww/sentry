@@ -229,10 +229,12 @@ export default class ReplayReader {
     )
   );
 
-  getDOMFrames = memoize(() => [
-    ...this._sortedBreadcrumbFrames.filter(frame => 'nodeId' in (frame.data ?? {})),
-    ...this._sortedSpanFrames.filter(frame => 'nodeId' in (frame.data ?? {})),
-  ]);
+  getDOMFrames = memoize(() =>
+    [
+      ...this._sortedBreadcrumbFrames.filter(frame => 'nodeId' in (frame.data ?? {})),
+      ...this._sortedSpanFrames.filter(frame => 'nodeId' in (frame.data ?? {})),
+    ].sort(sortFrames)
+  );
 
   getDomNodes = memoize(() =>
     extractDomNodes({
@@ -251,20 +253,16 @@ export default class ReplayReader {
       ...this._sortedBreadcrumbFrames.filter(
         frame =>
           [
-            'replay.init',
-            'ui.click',
-            'replay.mutations',
-            'ui.slowClickDetected',
             'navigation',
+            'replay.init',
+            'replay.mutations',
+            'ui.click',
+            'ui.slowClickDetected',
           ].includes(frame.category) ||
           (frame.category === 'ui.multiClick' &&
             (frame as MultiClickFrame).data.clickCount >= 3)
       ),
-      ...this._sortedSpanFrames.filter(frame =>
-        ['navigation.navigate', 'navigation.reload', 'navigation.back_forward'].includes(
-          frame.op
-        )
-      ),
+      ...this._sortedSpanFrames.filter(frame => frame.op.startsWith('navigation.')),
       ...this._errors,
     ].sort(sortFrames)
   );
@@ -272,11 +270,9 @@ export default class ReplayReader {
   getTimelineFrames = memoize(() =>
     [
       ...this._sortedBreadcrumbFrames.filter(frame =>
-        ['replay.init', 'ui.click'].includes(frame.category)
+        ['navigation', 'replay.init', 'ui.click'].includes(frame.category)
       ),
-      ...this._sortedSpanFrames.filter(frame =>
-        ['navigation.navigate', 'navigation.reload'].includes(frame.op)
-      ),
+      ...this._sortedSpanFrames.filter(frame => frame.op.startsWith('navigation.')),
       ...this._errors,
     ].sort(sortFrames)
   );
