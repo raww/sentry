@@ -78,7 +78,12 @@ cmdclass = {
 
 def get_requirements(env):
     with open(f"requirements-{env}.txt") as fp:
-        return [x.strip() for x in fp.read().split("\n") if not x.startswith(("#", "--"))]
+        return [
+            # XXX: for some reason setuptools doesn't know `a.b` and `a-b` are the same
+            x.strip().replace("backports-zoneinfo", "backports.zoneinfo")
+            for x in fp.read().split("\n")
+            if not x.startswith(("#", "--"))
+        ]
 
 
 # Only include dev requirements in non-binary distributions as we don't want these
