@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+import datetime
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -373,7 +374,7 @@ class TestCommentWorkflow(GithubCommentTestCase):
     @patch("sentry.tasks.integrations.github.pr_comment.metrics")
     @with_feature("organizations:pr-comment-bot")
     @responses.activate
-    @freeze_time(datetime(2023, 6, 8, 0, 0, 0, tzinfo=timezone.utc))
+    @freeze_time(datetime.datetime(2023, 6, 8, 0, 0, 0, tzinfo=datetime.timezone.utc))
     def test_comment_workflow_updates_comment(self, mock_metrics, get_jwt, mock_issues):
         groups = [g.id for g in Group.objects.all()]
         mock_issues.return_value = [{"group_id": id, "event_count": 10} for id in groups]

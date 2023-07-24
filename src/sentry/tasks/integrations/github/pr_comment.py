@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 import sentry_sdk
 from django.db import connection
-from django.utils import timezone
 from snuba_sdk import Column, Condition, Direction, Entity, Function, Op, OrderBy, Query
 from snuba_sdk import Request as SnubaRequest
 
@@ -143,7 +142,7 @@ def create_or_update_comment(
     if pr_comment is None:
         resp = client.create_comment(repo=repo.name, issue_id=pr_key, data={"body": comment_body})
 
-        current_time = timezone.now()
+        current_time = datetime.now(tz=timezone.utc)
         PullRequestComment.objects.create(
             external_id=resp.body["id"],
             pull_request_id=pullrequest_id,
@@ -156,7 +155,7 @@ def create_or_update_comment(
             repo=repo.name, comment_id=pr_comment.external_id, data={"body": comment_body}
         )
 
-        pr_comment.updated_at = timezone.now()
+        pr_comment.updated_at = datetime.now(tz=timezone.utc)
         pr_comment.group_ids = issue_list
         pr_comment.save()
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
@@ -18,7 +18,6 @@ from typing import (
 )
 
 from django.db import DataError, connections, router
-from django.utils import timezone
 
 if TYPE_CHECKING:
     from sentry.api.event_search import SearchFilter
@@ -208,9 +207,9 @@ def parse_datetime_range(
         raise InvalidQuery(f"{value} is not a valid datetime query")
 
     if flag == "-":
-        return (timezone.now() - delta, True), None
+        return (datetime.now(tz=timezone.utc) - delta, True), None
     else:
-        return None, (timezone.now() - delta, True)
+        return None, (datetime.now(tz=timezone.utc) - delta, True)
 
 
 DATE_FORMAT = "%Y-%m-%d"

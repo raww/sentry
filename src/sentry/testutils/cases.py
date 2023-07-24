@@ -1,48 +1,12 @@
 from __future__ import annotations
 
-import responses
-import sentry_kafka_schemas
-
-from sentry.sentry_metrics.use_case_id_registry import UseCaseID
-from sentry.utils.dates import to_timestamp
-
-__all__ = (
-    "TestCase",
-    "TransactionTestCase",
-    "APITestCase",
-    "TwoFactorAPITestCase",
-    "AuthProviderTestCase",
-    "RuleTestCase",
-    "PermissionTestCase",
-    "PluginTestCase",
-    "CliTestCase",
-    "AcceptanceTestCase",
-    "IntegrationTestCase",
-    "SnubaTestCase",
-    "BaseMetricsTestCase",
-    "BaseMetricsLayerTestCase",
-    "BaseIncidentsTest",
-    "IntegrationRepositoryTestCase",
-    "ReleaseCommitPatchTest",
-    "SetRefsTestCase",
-    "OrganizationDashboardWidgetTestCase",
-    "SCIMTestCase",
-    "SCIMAzureTestCase",
-    "MetricsEnhancedPerformanceTestCase",
-    "MetricsAPIBaseTestCase",
-    "OrganizationMetricMetaIntegrationTestCase",
-    "ProfilesSnubaTestCase",
-    "ReplaysAcceptanceTestCase",
-    "ReplaysSnubaTestCase",
-    "MonitorTestCase",
-    "MonitorIngestTestCase",
-)
+import datetime
 import hashlib
 import inspect
 import os.path
 import time
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import timedelta
 from io import BytesIO
 from typing import Dict, List, Literal, Optional, Sequence, Union
 from unittest import mock
@@ -53,6 +17,8 @@ from zlib import compress
 import pytest
 import pytz
 import requests
+import responses
+import sentry_kafka_schemas
 from click.testing import CliRunner
 from django.conf import settings
 from django.contrib.auth import login
@@ -137,6 +103,7 @@ from sentry.search.events.constants import (
     SPAN_METRICS_MAP,
 )
 from sentry.sentry_metrics import indexer
+from sentry.sentry_metrics.use_case_id_registry import UseCaseID
 from sentry.silo import SiloMode
 from sentry.snuba.metrics.datasource import get_series
 from sentry.tagstore.snuba import SnubaTagStorage
@@ -147,6 +114,7 @@ from sentry.testutils.helpers.slack import install_slack
 from sentry.types.integrations import ExternalProviders
 from sentry.utils import json
 from sentry.utils.auth import SsoSession
+from sentry.utils.dates import to_timestamp
 from sentry.utils.json import dumps_htmlsafe
 from sentry.utils.performance_issues.performance_detection import detect_performance_problems
 from sentry.utils.pytest.selenium import Browser
@@ -170,6 +138,38 @@ from .fixtures import Fixtures
 from .helpers import AuthProvider, Feature, TaskRunner, override_options, parse_queries
 from .silo import assume_test_silo_mode
 from .skips import requires_snuba
+
+__all__ = (
+    "TestCase",
+    "TransactionTestCase",
+    "APITestCase",
+    "TwoFactorAPITestCase",
+    "AuthProviderTestCase",
+    "RuleTestCase",
+    "PermissionTestCase",
+    "PluginTestCase",
+    "CliTestCase",
+    "AcceptanceTestCase",
+    "IntegrationTestCase",
+    "SnubaTestCase",
+    "BaseMetricsTestCase",
+    "BaseMetricsLayerTestCase",
+    "BaseIncidentsTest",
+    "IntegrationRepositoryTestCase",
+    "ReleaseCommitPatchTest",
+    "SetRefsTestCase",
+    "OrganizationDashboardWidgetTestCase",
+    "SCIMTestCase",
+    "SCIMAzureTestCase",
+    "MetricsEnhancedPerformanceTestCase",
+    "MetricsAPIBaseTestCase",
+    "OrganizationMetricMetaIntegrationTestCase",
+    "ProfilesSnubaTestCase",
+    "ReplaysAcceptanceTestCase",
+    "ReplaysSnubaTestCase",
+    "MonitorTestCase",
+    "MonitorIngestTestCase",
+)
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
 
@@ -954,7 +954,9 @@ class AcceptanceTestCase(TransactionTestCase):
     def _setup_today(self):
         with mock.patch(
             "django.utils.timezone.now",
-            return_value=(datetime(2013, 5, 18, 15, 13, 58, 132928, tzinfo=timezone.utc)),
+            return_value=(
+                datetime.datetime(2013, 5, 18, 15, 13, 58, 132928, tzinfo=datetime.timezone.utc)
+            ),
         ):
             yield
 
@@ -1510,7 +1512,7 @@ class BaseMetricsLayerTestCase(BaseMetricsTestCase):
         )
 
     @staticmethod
-    def adjust_timestamp(time: datetime) -> datetime:
+    def adjust_timestamp(time: datetime.datetime) -> datetime.datetime:
         # We subtract 1 second -(+1) in order to account for right non-inclusivity in the queries.
         #
         # E.g.: if we save at 10:00:00, and we have as "end" of the query that time, we must store our
@@ -1653,7 +1655,9 @@ class MetricsEnhancedPerformanceTestCase(BaseMetricsLayerTestCase, TestCase):
         "user": "metrics_sets",
     }
     METRIC_STRINGS = []
-    DEFAULT_METRIC_TIMESTAMP = datetime(2015, 1, 1, 10, 15, 0, tzinfo=timezone.utc)
+    DEFAULT_METRIC_TIMESTAMP = datetime.datetime(
+        2015, 1, 1, 10, 15, 0, tzinfo=datetime.timezone.utc
+    )
 
     def setUp(self):
         super().setUp()
@@ -1683,7 +1687,7 @@ class MetricsEnhancedPerformanceTestCase(BaseMetricsLayerTestCase, TestCase):
         internal_metric: Optional[str] = None,
         entity: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
-        timestamp: Optional[datetime] = None,
+        timestamp: Optional[datetime.datetime] = None,
         project: Optional[int] = None,
         use_case_id: UseCaseID = UseCaseID.TRANSACTIONS,
     ):
@@ -1723,7 +1727,7 @@ class MetricsEnhancedPerformanceTestCase(BaseMetricsLayerTestCase, TestCase):
         internal_metric: Optional[str] = None,
         entity: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
-        timestamp: Optional[datetime] = None,
+        timestamp: Optional[datetime.datetime] = None,
         project: Optional[int] = None,
         use_case_id: UseCaseID = UseCaseID.TRANSACTIONS,  # TODO(wmak): this needs to be the span id
     ):
@@ -1934,7 +1938,7 @@ class ReplaysSnubaTestCase(TestCase):
 # AcceptanceTestCase and TestCase are mutually exclusive base classses
 class ReplaysAcceptanceTestCase(AcceptanceTestCase, SnubaTestCase):
     def setUp(self):
-        self.now = datetime.utcnow().replace(tzinfo=pytz.utc)
+        self.now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         super().setUp()
         self.drop_replays()
         patcher = mock.patch("django.utils.timezone.now", return_value=self.now)

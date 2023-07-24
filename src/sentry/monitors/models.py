@@ -413,7 +413,7 @@ class MonitorCheckIn(Model):
 
     def save(self, *args, **kwargs):
         if not self.date_added:
-            self.date_added = timezone.now()
+            self.date_added = datetime.now(tz=timezone.utc)
         if not self.date_updated:
             self.date_updated = self.date_added
         return super().save(*args, **kwargs)
@@ -506,8 +506,8 @@ class MonitorEnvironment(Model):
         from sentry.signals import monitor_environment_failed
 
         if last_checkin is None:
-            next_checkin_base = timezone.now()
-            last_checkin = self.last_checkin or timezone.now()
+            next_checkin_base = datetime.now(tz=timezone.utc)
+            last_checkin = self.last_checkin or datetime.now(tz=timezone.utc)
         else:
             next_checkin_base = last_checkin
 
