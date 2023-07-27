@@ -11,7 +11,6 @@ from django.utils import timezone
 from snuba_sdk import Column, Condition, Direction, Entity, Function, Op, OrderBy, Query
 from snuba_sdk import Request as SnubaRequest
 
-from sentry import features
 from sentry.integrations.github.client import GitHubAppsClient
 from sentry.models import Group, GroupOwnerType, Project
 from sentry.models.options.organization_option import OrganizationOption
@@ -185,13 +184,10 @@ def github_comment_workflow(pullrequest_id: int, project_id: int):
         metrics.incr("github_pr_comment.error", tags={"type": "missing_org"})
         return
 
-    if not (
-        features.has("organizations:pr-comment-bot", organization)
-        and OrganizationOption.objects.get_value(
-            organization=organization,
-            key="sentry:github_pr_bot",
-            default=True,
-        )
+    if not OrganizationOption.objects.get_value(
+        organization=organization,
+        key="sentry:github_pr_bot",
+        default=True,
     ):
         logger.error("github.pr_comment.option_missing", extra={"organization_id": org_id})
         return
