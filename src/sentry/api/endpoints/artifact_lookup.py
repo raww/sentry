@@ -80,14 +80,25 @@ class ProjectArtifactLookupEndpoint(ProjectEndpoint):
             )
             metrics.incr("sourcemaps.download.flat_file_index")
 
+            if file is None:
+                raise Http404
+
+            # We select the `File` directly to use the Streaming Download if it exists,
+            # otherwise we use `load_flat_file_index`
+            if file.flat_file_index:
+                fp = file.flat_file_index.getfile()
+                return StreamingHttpResponse(
+                    iter(lambda: fp.read(4096), b""), content_type="application/json"
+                )
+            else:
+                if data := file.load_flat_file_index():
+                    return HttpResponse(data, content_type="application/json")
+                else:
+                    return Http404
+
         if file is None:
             raise Http404
-        if isinstance(file, ArtifactBundleFlatFileIndex):
-            file = file.flat_file_index
-        else:
-            file = file.file
-        if file is None:
-            raise Http404
+        file = file.file
 
         try:
             fp = file.getfile()
