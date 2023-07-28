@@ -20,7 +20,7 @@ class TeamIssueBreakdownTest(APITestCase):
         project2 = self.create_project(teams=[self.team], slug="bar")
         group1 = self.create_group(project=project1)
         group2 = self.create_group(project=project2)
-        with assume_test_silo_mode(SiloMode.CONTROL):
+        with assume_test_silo_mode(SiloMode.REGION):
             GroupAssignee.objects.assign(group1, self.user)
             GroupAssignee.objects.assign(group2, self.user)
 
