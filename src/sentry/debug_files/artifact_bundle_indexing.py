@@ -184,7 +184,7 @@ class FlatFileIdentifier(NamedTuple):
         result = ArtifactBundleFlatFileIndex.objects.filter(
             project_id=self.project_id, release_name=self.release, dist_name=self.dist
         ).first()
-        if result is None or result.flat_file_index is None:
+        if result is None:
             return None
 
         return FlatFileMeta(id=result.id, date=result.date_added)
@@ -325,7 +325,7 @@ class FlatFileIndex:
         self._files_by_url = json_idx.get("files_by_url", {})
         self._files_by_debug_id = json_idx.get("files_by_debug_id", {})
 
-    def to_json(self) -> bytes:
+    def to_json(self) -> str:
         bundles = [
             {
                 # NOTE: Symbolicator is using the `bundle_id` as the `?download=...`
@@ -343,7 +343,7 @@ class FlatFileIndex:
             "files_by_debug_id": self._files_by_debug_id,
         }
 
-        return json.dumps(json_idx).encode()
+        return json.dumps(json_idx)
 
     def merge_urls(self, bundle_meta: BundleMeta, bundle_archive: ArtifactBundleArchive):
         bundle_index = self._add_or_update_bundle(bundle_meta)

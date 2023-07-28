@@ -135,7 +135,7 @@ class ArtifactBundleFlatFileIndex(Model):
         return f"bundle_index:{self.id}"
 
     def update_flat_file_index(self, data: str):
-        nodestore.set_bytes(self._nodestore_id(), data)
+        nodestore.set_bytes(self._nodestore_id(), data.encode())
 
         current_file = self.flat_file_index
         if current_file:
