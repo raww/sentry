@@ -1,4 +1,4 @@
-from sentry.runner.commands.backup import (
+from sentry.backup.comparators import (
     DateUpdatedComparator,
     EmailObfuscatingComparator,
     HashObfuscatingComparator,

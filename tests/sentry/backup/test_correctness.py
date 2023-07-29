@@ -1,6 +1,6 @@
 import pytest
 
-from sentry.runner.commands.backup import DEFAULT_COMPARATORS, InstanceID
+from sentry.backup.comparators import DEFAULT_COMPARATORS, InstanceID
 from sentry.testutils.helpers.backups import (
     ValidationError,
     import_export_from_fixture_then_validate,
